@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>Bugbox - Code Playground</title>
+  <script src="https://unpkg.com/blockly/blockly.min.js"></script>
+  <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"> -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Blue header with logo + title only */
+    header {
+      display: flex;
+      align-items: center;
+      background-color: #d5e8ff;
+      padding: 8px 16px;
+      border-bottom: 1px solid #ccc;
+    }
+
+    /* .title {
+      display: flex;
+      align-items: center;
+      font-weight: bold;
+      font-size: 18px;
+      
+    } */
+
+    .title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      /* ← this pushes buttons to the right */
+      width: 100%;
+    }
+
+    .title img {
+      height: 85px;
+      margin-right: 10px;
+    }
+
+
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      background-color: #f1f1f1;
+      padding: 8px 16px;
+      border-bottom: 1px solid #ccc;
+    }
+
+    .toolbar button {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      background-color: #f5f5f5;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 6px 12px;
+      cursor: pointer;
+      font-size: 12px;
+      width: 60px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+      transition: background-color 0.2s ease;
+    }
+
+    .toolbar button:hover {
+      background-color: #e0e0e0;
+    }
+
+    .material-symbols-outlined {
+      font-size: 20px;
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+
+    #blocklyDiv {
+      height: 100%;
+      width: 100%;
+    }
+
+    #codeArea {
+      width: 400px;
+      background-color: #f9f9f9;
+      border-left: 1px solid #ccc;
+      padding: 10px;
+      overflow: auto;
+    }
+
+    #codeArea pre {
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+    }
+
+    /* Add to existing styles */
+    .blocklyTreeRow {
+      padding: 8px 0;
+      margin: 2px 0;
+    }
+
+    /* Add these styles */
+    .blocklyToolboxDiv .blocklyTreeRow {
+      border-bottom: 1px solid #ccc;
+      /* light gray separator line */
+      position: relative;
+      padding-left: 32px !important;
+      height: 32px !important;
+      align-items: center;
+    }
+
+    .blocklyToolboxDiv .blocklyTreeRow::before {
+      content: '';
+      position: absolute;
+      left: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 30px;
+      height: 30px;
+      background-size: contain;
+      background-repeat: no-repeat;
+      z-index: 1;
+    }
+
+    .blocklyTreeRow.category-comments::before {
+      background-image: url('Images/circle.svg');
+    }
+
+    .blocklyTreeRow.category-control::before {
+      background-image: url('Images/triangle.svg');
+    }
+
+    .blocklyTreeRow.category-io::before {
+      background-image: url('Images/square.svg');
+    }
+
+    .blocklyTreeRow.category-variables::before {
+      background-image: url('Images/diamond.svg');
+    }
+
+
+
+
+    .blocklyToolboxDiv .blocklyTreeRow {
+      border-bottom: 1px solid #ccc;
+      position: relative;
+      padding-left: 32px !important;
+      height: 36px !important;
+      display: flex;
+      align-items: center;
+      font-size: 14px;
+    }
+
+    .blocklyToolboxDiv .blocklyTreeRow::before {
+      content: '';
+      position: absolute;
+      left: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 26px;
+      height: 26px;
+      background-size: contain;
+      background-repeat: no-repeat;
+      z-index: 1;
+    }
+
+    .blocklyToolboxDiv .blocklyTreeRow::after {
+      content: '▶';
+      position: absolute;
+      right: -10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #888;
+      font-size: 15px;
+    }
+
+
+    .blocklyToolboxDiv .blocklyTreeRow {
+      padding: 12px;
+      height: auto;
+      right: 12px;
+    }
+
+    .highlight-btn {
+      width: auto !important;
+      min-width: 140px !important;
+      padding: 8px 24px !important;
+      border-radius: 24px !important;
+      font-size: 12px !important;
+      font-weight: 600 !important;
+      color: #d32f2f !important;
+      border: 2px solid #d32f2f !important;
+      background-color: #fff !important;
+      box-shadow: 0 2px 6px rgba(211, 47, 47, 0.3) !important;
+      flex-direction: row !important;
+      gap: 8px !important;
+      justify-content: center !important;
+      align-items: center !important;
+      cursor: pointer !important;
+      box-sizing: border-box;
+    }
+
+    #selectSerialBtn {
+      color: orange !important;
+      border-color: orange !important;
+    }
+
+    #pushCodeBtn {
+      background-color: rgba(192, 190, 190, 0.938) !important;
+      color: black !important;
+      border-color: black !important;
+    }
+
+    /* Push right buttons container to the right */
+    .toolbar-right-buttons {
+      margin-left: auto;
+      display: flex;
+      gap: 10px;
+    }
+
+
+
+
+    .user-buttons {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .icon-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      padding: 6px 12px;
+      border: none;
+      background-color: white;
+      color: #f57c00;
+      font-weight: bold;
+      border-radius: 20px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+      cursor: pointer;
+      font-size: 13px;
+      transition: background-color 0.2s ease;
+    }
+
+    .user-btn {
+      padding: 6px 16px;
+      background-color: #fbfbfb;
+      border: none;
+      border-radius: 20px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    #userContent {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="title">
+      <img src="../BUGBOX/logo.png" alt="Bugbox Logo">
+
+      <div class="user-buttons">
+        <button id="emailBtn" class="icon-btn" title="Email" style="background-color:#d5e8ff;">
+          <span class="material-symbols-outlined" style="color: #f12f2f;">mail</span>
+        </button>
+
+        <button id="shopBtn" class="icon-btn" style="color: #0e0e0e;">Bot Shop
+          <span class="material-symbols-outlined" style="color: #f57c00;">shopping_cart</span>
+        </button>
+
+        <!-- <button id="userBtn" class="user-btn">User_001
+          <span class="material-symbols-outlined">person</span>
+        </button> -->
+
+        <button id="userBtn" class="user-btn">
+          <span id="userContent">
+            <span id="userName">User_001</span>
+            <span class="material-symbols-outlined">person</span>
+          </span>
+        </button>
+
+      </div>
+
+    </div>
+  </header>
+
+  <div class="toolbar">
+    <button onclick="workspace.undo(false)">
+      <span class="material-symbols-outlined">undo</span> Undo
+    </button>
+    <button onclick="workspace.undo(true)">
+      <span class="material-symbols-outlined">redo</span> Redo
+    </button>
+    <button onclick="saveWorkspace()">
+      <span class="material-symbols-outlined">save</span> Save
+    </button>
+    <button onclick="clearWorkspace()">
+      <span class="material-symbols-outlined">delete</span> Clear
+    </button>
+
+
+    <!-- Right side buttons wrapper -->
+    <div class="toolbar-right-buttons">
+      <button id="selectSerialBtn" class="highlight-btn">
+        <span class="material-symbols-outlined" style="font-size:18px;">usb</span>
+        Select Serial Port
+      </button>
+      <button id="pushCodeBtn" class="highlight-btn">
+        <span class="material-symbols-outlined" style="font-size:18px;">upload</span>
+        Push Code to Device
+      </button>
+    </div>
+
+  </div>
+
+  <main>
+    <div id="blocklyDiv"></div>
+    <div id="codeArea">
+      <p>Your code will appear here, Add some code blocks to get started</p>
+      <pre id="generatedCode"></pre>
+    </div>
+  </main>
+
+  <xml id="toolbox" style="display: none">
+    <category id="Comments" name="Comments" colour="#60d6c0" class="category-comments">
+      <block type="text"></block>
+    </category>
+    <category name="Control" colour="#f55b2a" class="category-control">
+      <block type="controls_repeat_ext"></block>
+    </category>
+    <category name="Input/Output" colour="#eee96b" class="category-io">
+      <block type="text_print"></block>
+    </category>
+    <category name="Variables" custom="VARIABLE" colour="#7ec98f" class="category-variables"></category>
+  </xml>
+
+
+  <script>
+
+
+    const workspace = Blockly.inject('blocklyDiv', {
+      toolbox: document.getElementById('toolbox'),
+      scrollbars: true,
+      trashcan: true
+    });
+
+    workspace.registerToolboxCategoryCallback('VARIABLE', Blockly.Variables.flyoutCategory);
+    function applyCategoryClasses() {
+      const toolboxItems = document.querySelectorAll('.blocklyTreeRow');
+      toolboxItems.forEach(item => {
+        const label = item.querySelector('.blocklyTreeLabel')?.textContent.trim();
+        if (label === 'Comments') item.classList.add('category-comments');
+        if (label === 'Control') item.classList.add('category-control');
+        if (label === 'Input/Output') item.classList.add('category-io');
+        if (label === 'Variables') item.classList.add('category-variables');
+      });
+    }
+    setTimeout(applyCategoryClasses, 100); // Slight delay ensures DOM is ready
+
+
+    function updateCode() {
+      const code = Blockly.JavaScript.workspaceToCode(workspace);
+      document.getElementById('generatedCode').textContent = code;
+    }
+
+    workspace.addChangeListener(updateCode);
+
+    function saveWorkspace() {
+      const xml = Blockly.Xml.workspaceToDom(workspace);
+      const xmlText = Blockly.Xml.domToPrettyText(xml);
+      localStorage.setItem('blocklySave', xmlText);
+      alert("Workspace saved!");
+    }
+
+    function clearWorkspace() {
+      workspace.clear();
+      updateCode();
+    }
+
+    window.onload = function () {
+      const xmlText = localStorage.getItem('blocklySave');
+      if (xmlText) {
+        const xml = Blockly.Xml.textToDom(xmlText);
+        Blockly.Xml.domToWorkspace(xml, workspace);
+      }
+    };
+
+
+
+  </script>
+</body>
+
+</html>
